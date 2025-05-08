@@ -14,15 +14,16 @@ def get_data():
     btc_data = requests.get(btc_url).json()
     eth_data = requests.get(eth_url).json()
 
-    # Memeriksa respons API dan mencetak data
-    print("Data BTC:", btc_data)  # Cek data BTC
-    print("Data ETH:", eth_data)  # Cek data ETH
-
     # Memeriksa apakah data harga ada dalam respons
-    if 'prices' not in btc_data or 'prices' not in eth_data:
-        raise ValueError("Data harga tidak ditemukan dalam respons API")
+    if 'prices' not in btc_data:
+        print(f"Error: Tidak ada data harga Bitcoin ditemukan.\nRespons: {btc_data}")
+        raise ValueError("Data harga Bitcoin tidak ditemukan dalam respons API")
 
-    # Data harga dan volume BTC dan ETH
+    if 'prices' not in eth_data:
+        print(f"Error: Tidak ada data harga Ethereum ditemukan.\nRespons: {eth_data}")
+        raise ValueError("Data harga Ethereum tidak ditemukan dalam respons API")
+    
+    # Mengambil harga dan timestamp
     btc_prices = np.array([x[1] for x in btc_data['prices']])
     eth_prices = np.array([x[1] for x in eth_data['prices']])
     timestamps = [datetime.utcfromtimestamp(x[0] / 1000) for x in btc_data['prices']]
@@ -51,5 +52,19 @@ except ValueError as e:
 if df.empty:
     print("Tidak ada data yang berhasil diambil.")
 else:
-    print("DataFrame head:", df.head())  # Menampilkan 5 baris pertama
+    print("DataFrame head:")
+    print(df.head())  # Menampilkan 5 baris pertama untuk pemeriksaan
 
+# Menampilkan DataFrame di Streamlit jika ada data
+if not df.empty:
+    st.write(df)
+    
+    # Menampilkan grafik dominasi Bitcoin
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['timestamp'], df['btc_dominance'], label='Bitcoin Dominance', color='blue')
+    plt.xlabel('Tanggal')
+    plt.ylabel('Dominasi Bitcoin (%)')
+    plt.title('Prediksi Dominasi Bitcoin Terhadap Altcoin')
+    plt.xticks(rotation=45)
+    plt.legend()
+    st.pyplot(plt)
