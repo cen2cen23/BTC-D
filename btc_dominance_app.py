@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
+import streamlit as st
 
 # Fungsi untuk mengambil data dari CoinGecko
 def get_data():
@@ -12,8 +13,11 @@ def get_data():
     # Mengambil data harga Bitcoin dan Ethereum
     btc_data = requests.get(btc_url).json()
     eth_data = requests.get(eth_url).json()
-    
+
     # Periksa apakah data berhasil diterima
+    print("Data BTC:", btc_data)  # Cek data BTC
+    print("Data ETH:", eth_data)  # Cek data ETH
+
     if 'prices' not in btc_data or 'prices' not in eth_data:
         raise ValueError("Data harga tidak ditemukan dalam respons API")
 
@@ -58,6 +62,9 @@ def calculate_macd(data, fast=12, slow=26, signal=9):
 # Mengambil data
 df = get_data()
 
+# Memeriksa apakah data diambil dengan benar
+print("DataFrame head:", df.head())  # Menampilkan 5 baris pertama
+
 # Menghitung indikator teknikal
 df['rsi'] = calculate_rsi(df['btc_dominance'])
 df['macd'], df['macd_signal'], df['macd_hist'] = calculate_macd(df['btc_dominance'])
@@ -69,21 +76,23 @@ df['ma_30'] = df['btc_dominance'].rolling(window=30).mean()
 # Analisis crossover MA
 crossover_signal = np.where(df['ma_7'] < df['ma_30'], 1, 0)
 
+# Menampilkan grafik dengan Streamlit
+st.title("Analisis Dominasi Bitcoin")
+
 # Menampilkan grafik
-plt.figure(figsize=(10, 5))
-plt.plot(df['timestamp'], df['btc_dominance'], label="Dominasi Bitcoin", color='b')
-plt.plot(df['timestamp'], df['ma_7'], label="MA 7 hari", color='g', linestyle='--')
-plt.plot(df['timestamp'], df['ma_30'], label="MA 30 hari", color='r', linestyle='--')
-plt.title("Analisis Moving Average pada Dominasi Bitcoin")
-plt.xlabel("Tanggal")
-plt.ylabel("Dominasi Bitcoin (%)")
-plt.legend()
-plt.xticks(rotation=45)
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.plot(df['timestamp'], df['btc_dominance'], label="Dominasi Bitcoin", color='b')
+ax.plot(df['timestamp'], df['ma_7'], label="MA 7 hari", color='g', linestyle='--')
+ax.plot(df['timestamp'], df['ma_30'], label="MA 30 hari", color='r', linestyle='--')
+ax.set_title("Analisis Moving Average pada Dominasi Bitcoin")
+ax.set_xlabel("Tanggal")
+ax.set_ylabel("Dominasi Bitcoin (%)")
+ax.legend()
+ax.set_xticklabels(df['timestamp'], rotation=45)
 plt.tight_layout()
 
-# Menyimpan grafik crossover
-plt.savefig("btc_dominance_ma_crossover.png")
-plt.show()
+# Menampilkan grafik di Streamlit
+st.pyplot(fig)
 
 # Menampilkan analisis teks berdasarkan indikator teknikal
 def analyze_indicators():
@@ -114,6 +123,6 @@ def analyze_indicators():
     # Gabungkan semua analisis
     return "\n".join(analysis)
 
-# Tampilkan analisis teks
-print("Analisis Dominasi Bitcoin:")
-print(analyze_indicators())
+# Tampilkan analisis teks di Streamlit
+st.subheader("Analisis Dominasi Bitcoin")
+st.text(analyze_indicators())
