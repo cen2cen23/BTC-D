@@ -13,6 +13,10 @@ def get_data():
     btc_data = requests.get(btc_url).json()
     eth_data = requests.get(eth_url).json()
     
+    # Periksa apakah data berhasil diterima
+    if 'prices' not in btc_data or 'prices' not in eth_data:
+        raise ValueError("Data harga tidak ditemukan dalam respons API")
+
     # Data harga dan volume BTC dan ETH
     btc_prices = np.array([x[1] for x in btc_data['prices']])
     eth_prices = np.array([x[1] for x in eth_data['prices']])
