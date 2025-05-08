@@ -98,27 +98,33 @@ st.pyplot(fig)
 def analyze_indicators():
     analysis = []
     
+    # Nilai Dominasi Bitcoin terkini
+    current_dominance = df['btc_dominance'].iloc[-1]
+    analysis.append(f"Dominasi Bitcoin terkini: {current_dominance:.2f}%")
+    
     # Analisis RSI
-    if df['rsi'].iloc[-1] > 70:
-        analysis.append("RSI menunjukkan bahwa dominasi Bitcoin sedang overbought, yang bisa berarti penurunan di masa depan.")
-    elif df['rsi'].iloc[-1] < 30:
-        analysis.append("RSI menunjukkan bahwa dominasi Bitcoin sedang oversold, yang bisa berarti potensi kenaikan.")
+    current_rsi = df['rsi'].iloc[-1]
+    if current_rsi > 70:
+        analysis.append(f"RSI: {current_rsi:.2f} - Dominasi Bitcoin overbought, potensi penurunan.")
+    elif current_rsi < 30:
+        analysis.append(f"RSI: {current_rsi:.2f} - Dominasi Bitcoin oversold, potensi kenaikan.")
     else:
-        analysis.append("RSI berada dalam zona netral, menandakan dominasi Bitcoin bisa bergerak dalam rentang yang lebih stabil.")
+        analysis.append(f"RSI: {current_rsi:.2f} - Dominasi Bitcoin berada dalam zona netral.")
     
     # Analisis MACD
-    if df['macd_hist'].iloc[-1] > 0:
-        analysis.append("MACD menunjukkan tren bullish pada dominasi Bitcoin.")
-    elif df['macd_hist'].iloc[-1] < 0:
-        analysis.append("MACD menunjukkan tren bearish pada dominasi Bitcoin.")
+    current_macd_hist = df['macd_hist'].iloc[-1]
+    if current_macd_hist > 0:
+        analysis.append(f"MACD Histogram: {current_macd_hist:.2f} - Tren bullish pada dominasi Bitcoin.")
+    elif current_macd_hist < 0:
+        analysis.append(f"MACD Histogram: {current_macd_hist:.2f} - Tren bearish pada dominasi Bitcoin.")
     else:
-        analysis.append("MACD berada dalam kondisi netral, dengan dominasi Bitcoin tidak menunjukkan tren yang jelas.")
+        analysis.append(f"MACD Histogram: {current_macd_hist:.2f} - Tidak ada tren yang jelas.")
     
     # Analisis Crossover MA
     if crossover_signal[-1] == 1:
-        analysis.append("Sinyal crossover MA menunjukkan kemungkinan penurunan dominasi Bitcoin.")
+        analysis.append(f"Crossover MA: MA 7 hari lebih rendah dari MA 30 hari, kemungkinan penurunan.")
     else:
-        analysis.append("Dominasi Bitcoin masih menunjukkan kekuatan dengan crossover MA yang mendukung tren naik.")
+        analysis.append(f"Crossover MA: MA 7 hari lebih tinggi dari MA 30 hari, menunjukkan tren naik.")
     
     # Gabungkan semua analisis
     return "\n".join(analysis)
